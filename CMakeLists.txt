@@ -1,4 +1,3 @@
-# --- 1. Project Setup ---
 cmake_minimum_required(VERSION 3.20)
 project(MyCppProject VERSION 1.0)
 
@@ -14,35 +13,32 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# --- 4. Define Your Main Library ---
-# Add the library using only its source files
-add_library(my_lib
-  src/my_lib.cpp
-)
+# --- 4. Define Your Header-Only Library ---
+# The Vector class is header-only, so we define 'tea' as an INTERFACE library.
+# This means no source files are compiled, but the include directories are propagated.
+add_library(tea INTERFACE)
 
-# *** KEY CHANGE ***
 # Publicly list your 'include' directory.
-# This tells CMake that 'my_lib' requires this directory for its
-# public headers, and any target that links to 'my_lib' 
-# (like 'main' or 'run_tests') will also get this include path.
-target_include_directories(my_lib 
-  PUBLIC 
+# Any target that links to 'tea' will automatically get the 'include' path.
+target_include_directories(tea 
+  INTERFACE 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # --- 5. Define Your Main Executable ---
+# The executable is built *only* from src/main.cpp
 add_executable(main src/main.cpp)
-# 'main' links to 'my_lib' and automatically gets the include path
-target_link_libraries(main PRIVATE my_lib)
+# 'main' links to 'tea' to get access to the include paths for Vector.h
+target_link_libraries(main PRIVATE tea)
 
 # --- 6. Define Your Test Executable ---
 enable_testing()
-add_executable(run_tests test/test_my_lib.cpp)
+add_executable(run_tests test/Vector_test.cpp)
 
-# 'run_tests' links to 'my_lib' (getting its include path) and GTest
+# 'run_tests' links to 'tea' (getting its include path) and GTest
 target_link_libraries(run_tests 
   PRIVATE 
-    my_lib
+    tea
     GTest::gtest_main
 )
 
