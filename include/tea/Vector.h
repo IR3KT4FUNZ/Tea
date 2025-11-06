@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstddef>
 #include <utility>
 #pragma once
@@ -32,6 +33,9 @@ class Vector {
             return (m_ptr != other.m_ptr);
         }
     };
+    /* ========================================================
+       ====================     BIG 5    ======================
+       ======================================================== */
 
     Vector() : m_capacity{1}, m_size{0}, m_arr{new T[1]} {
     }
@@ -76,6 +80,7 @@ class Vector {
     }
 
     bool resize(size_t newSize) {
+        assert(newSize != 0);
         if (newSize < m_size) {
             return false;
         }
@@ -93,7 +98,11 @@ class Vector {
     }
 
     void shrinkToFit() {
-        resize(m_size);
+        if (m_size > 0) {
+            resize(m_size);
+        } else {
+            resize(1);
+        }
     }
 
     void push_back(const T& elem) {
@@ -116,6 +125,7 @@ class Vector {
     }
 
     void pop_back() {
+        assert(m_size > 0);
         (m_arr + (m_size - 1))->~T();
         m_size -= 1;
     }
@@ -125,11 +135,17 @@ class Vector {
     }
 
     T& back() {
+        assert(m_size > 0);
         return m_arr[m_size - 1];
     }
 
-    size_t size() {
+    size_t size() const {
         return m_size;
+    }
+
+    T& operator[](size_t index) {
+        assert(index < m_size);
+        return m_arr[index];
     }
 };
 
